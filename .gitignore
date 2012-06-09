@@ -1,0 +1,5 @@
+.rbenv-version
+.bundle/config
+voldemort-0.90.1-nruth/dist/
+voldemort-0.90.1-nruth/classes
+.DS_Store
