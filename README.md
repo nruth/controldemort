@@ -1,3 +1,20 @@
+Prototype elastic storage controller & instrumented Voldemort & YCSB from
+my masters thesis project. 
+
+Feel free to contact me if you can't figure out how to get started, as the
+documentation and scripts here are unlikely to be improved to a useful state.
+
+## Revision history
+
+has been squashed. It was mostly junk messages such as '.' or 'update' used
+for sending small updates to deployed servers during experimentation, rather
+than meaningful version updates. These files are original & first releases, so
+the history is not important.
+
+A separate commit has been retained which shows the changes made to Voldemort 
+and its YCSB client 8b3049495950ec4a51ad069b92b59fee753ec76d
+
+
 Useful commands:
 
 ## Remote load generator launching
