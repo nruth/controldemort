@@ -12,7 +12,7 @@ than meaningful version updates. These files are original & first releases, so
 the history is not important.
 
 A separate commit has been retained which shows the changes made to Voldemort 
-and its YCSB client 8b3049495950ec4a51ad069b92b59fee753ec76d
+and its YCSB client [8b3049495950ec4a51ad069b92b59fee753ec76d](https://github.com/nruth/controldemort/commit/8b3049495950ec4a51ad069b92b59fee753ec76d)
 
 ## Deployment
 
