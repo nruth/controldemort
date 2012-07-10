@@ -64,6 +64,12 @@ public class ConsistentRoutingStrategy implements RoutingStrategy {
     public ConsistentRoutingStrategy(HashFunction hash, Collection<Node> nodes, int numReplicas) {
         this.numReplicas = numReplicas;
         this.hash = hash;
+
+        // create lookup table for all the (primary?) partitions stored in the
+        // cluster
+        // * by asking each node for its partitions (cluster.xml)
+        // * using a tree for efficient contains-lookup for raising error on
+        // duplicate
         SortedMap<Integer, Node> m = new TreeMap<Integer, Node>();
         for(Node n: nodes) {
             for(Integer partition: n.getPartitionIds()) {
@@ -74,6 +80,8 @@ public class ConsistentRoutingStrategy implements RoutingStrategy {
             }
         }
 
+        // convert the tree to an array lookup-table
+        // all partitions from 0 to num_partitions-1 must be included
         this.partitionToNode = new Node[m.size()];
         for(int i = 0; i < m.size(); i++) {
             if(!m.containsKey(i))

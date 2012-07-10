@@ -22,6 +22,7 @@ import java.io.StringReader;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -30,9 +31,12 @@ import voldemort.StaticStoreClientFactory;
 import voldemort.VoldemortException;
 import voldemort.client.AbstractStoreClientFactory;
 import voldemort.client.ClientConfig;
+import voldemort.client.LazyStoreClient;
 import voldemort.client.SocketStoreClientFactory;
 import voldemort.client.StoreClient;
 import voldemort.client.StoreClientFactory;
+import voldemort.performance.benchmark.generator.SamePartitionGenerator;
+import voldemort.routing.RoutingStrategy;
 import voldemort.serialization.IdentitySerializer;
 import voldemort.serialization.Serializer;
 import voldemort.serialization.SerializerDefinition;
@@ -284,6 +288,19 @@ public class Benchmark {
             throw new VoldemortException("Store not initialized correctly");
         }
 
+        // Controldemort : give same-key generator its routing info
+        // assuming lazystoreclient, but could also work with defaultstoreclient
+        Store<Object, Object, Object> rawStore = VoldemortWrapper.extract_raw_store_for_routing_info((LazyStoreClient<Object, Object>) storeClient);
+        if(rawStore == null) {
+            throw new VoldemortException("failed to get raw store");
+        }
+
+        RoutingStrategy routing = VoldemortWrapper.extract_routing_from_store(rawStore);
+        if(routing == null) {
+            throw new VoldemortException("failed to get routing");
+        }
+        SamePartitionGenerator.setRoutingResolver(routing);
+
         // Calculate perThreadThroughputPerMs = default unlimited (-1)
         this.targetThroughput = workloadProps.getInt(TARGET_THROUGHPUT, -1);
         this.perThreadThroughputPerMs = -1;
@@ -334,7 +351,9 @@ public class Benchmark {
             ClientConfig clientConfig = new ClientConfig().setMaxThreads(numThreads)
                                                           .setMaxTotalConnections(numThreads)
                                                           .setMaxConnectionsPerNode(numThreads)
-                                                          .setBootstrapUrls(socketUrl);
+                                                          .setBootstrapUrls(socketUrl)
+                                                          .setConnectionTimeout(5000,
+                                                                                TimeUnit.MILLISECONDS);
 
             if(clientZoneId >= 0) {
                 clientConfig.setClientZoneId(clientZoneId);
@@ -390,10 +409,11 @@ public class Benchmark {
 
     public void warmUpAndRun() throws Exception {
         if(this.recordCount > 0) {
-            System.out.println("Running warmup");
-            runTests(false);
-            this.warmUpCompleted = true;
-            Metrics.getInstance().reset();
+            System.out.println("Warmup disabled: using record count to limit keygen ranges to prepopulated records. Consequently 'latest' selector will not work");
+            // System.out.println("Running warmup");
+            // runTests(false);
+            // this.warmUpCompleted = true;
+            // Metrics.getInstance().reset();
         }
 
         for(int index = 0; index < this.numIterations; index++) {
@@ -418,6 +438,13 @@ public class Benchmark {
             label = new String("warmup");
         }
         Vector<Thread> threads = new Vector<Thread>();
+
+        // Elastore Extension
+        if(runBenchmark) {
+            // Controldemort
+            VoldemortWrapper.startMeasurementListener();
+        }
+        // //
 
         for(int index = 0; index < this.numThreads; index++) {
             VoldemortWrapper db = new VoldemortWrapper(storeClient,
@@ -482,6 +509,16 @@ public class Benchmark {
         double throughput = Time.MS_PER_SECOND * ((double) localOpsCounts)
                             / ((double) (endRunBenchmark - startRunBenchmark));
         System.out.println("[" + label + "]\tThroughput(ops/sec): " + nf.format(throughput));
+
+        System.out.println("\nPARTITION ACCESS HISTOGRAM:\n"
+                           + VoldemortWrapper.dumpPartitionAccessHistogram());
+
+        // Controldemort
+        // halt after benchmark (but not warmup) runs
+        if(runBenchmark) {
+            VoldemortWrapper.halt_measurement();
+        }
+        // //
 
         if(runBenchmark) {
             Metrics.getInstance().printReport(System.out);

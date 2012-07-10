@@ -155,6 +155,8 @@ public abstract class AbstractStoreClientFactory implements StoreClientFactory {
         boolean repairReads = !storeDef.isView();
 
         // construct mapping
+        // this is to determine which nodes hold the key we're looking for,
+        // via partition positions
         Map<Integer, Store<ByteArray, byte[], byte[]>> clientMapping = Maps.newHashMap();
         Map<Integer, NonblockingStore> nonblockingStores = Maps.newHashMap();
         Map<Integer, NonblockingStore> nonblockingSlopStores = Maps.newHashMap();
@@ -164,12 +166,21 @@ public abstract class AbstractStoreClientFactory implements StoreClientFactory {
             slopStores = Maps.newHashMap();
 
         for(Node node: cluster.getNodes()) {
+
+            // access to store on this node, with working RMI/RPC connection
+            // (e.g. tcp or http)
             Store<ByteArray, byte[], byte[]> store = getStore(storeDef.getName(),
                                                               node.getHost(),
                                                               getPort(node),
                                                               this.requestFormatType);
+
+            // lookup table to get a node's RMI connection to the store we're
+            // processing
             clientMapping.put(node.getId(), store);
 
+            // nonblocking stores are just what they sound like - async stores
+            // supporting callbacks,
+            // so single-threads can send requests to multiple nodes in parallel
             NonblockingStore nonblockingStore = routedStoreFactory.toNonblockingStore(store);
             nonblockingStores.put(node.getId(), nonblockingStore);
 
@@ -197,6 +208,7 @@ public abstract class AbstractStoreClientFactory implements StoreClientFactory {
                                                                            repairReads,
                                                                            clientZoneId,
                                                                            getFailureDetector());
+        // decorator pattern, add logging
         store = new LoggingStore(store);
 
         if(isJmxEnabled) {

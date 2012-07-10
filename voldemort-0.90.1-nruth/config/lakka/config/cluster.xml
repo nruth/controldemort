@@ -1,0 +1,58 @@
+<cluster>
+  <name>Lakka</name>
+
+  <server>
+    <!-- The node id is a unique, sequential id beginning with 0 that identifies each server in the cluster-->
+    <id>0</id>
+    <host>Lakka-1.it.kth.se</host>
+    <http-port>8081</http-port>
+    <socket-port>6666</socket-port>
+    <admin-port>6667</admin-port>
+    <!-- A list of data partitions assigned to this server -->
+    <partitions>0,1,2,3,4</partitions>
+  </server>
+
+  <server>
+    <!-- The node id is a unique, sequential id beginning with 0 that identifies each server in the cluster-->
+    <id>1</id>
+    <host>Lakka-2.it.kth.se</host>
+    <http-port>8081</http-port>
+    <socket-port>6666</socket-port>
+    <admin-port>6667</admin-port>
+    <!-- A list of data partitions assigned to this server -->
+    <partitions>5,6,7,8,9,10,11</partitions>
+  </server>
+
+  <server>
+    <!-- The node id is a unique, sequential id beginning with 0 that identifies each server in the cluster-->
+    <id>2</id>
+    <host>Lakka-3.it.kth.se</host>
+    <http-port>8081</http-port>
+    <socket-port>6666</socket-port>
+    <admin-port>6667</admin-port>
+    <!-- A list of data partitions assigned to this server -->
+    <partitions></partitions>
+  </server>
+
+  <server>
+    <!-- The node id is a unique, sequential id beginning with 0 that identifies each server in the cluster-->
+    <id>3</id>
+    <host>Lakka-4.it.kth.se</host>
+    <http-port>8081</http-port>
+    <socket-port>6666</socket-port>
+    <admin-port>6667</admin-port>
+    <!-- A list of data partitions assigned to this server -->
+    <partitions></partitions>
+  </server>
+
+  <server>
+    <!-- The node id is a unique, sequential id beginning with 0 that identifies each server in the cluster-->
+    <id>4</id>
+    <host>Lakka-5.it.kth.se</host>
+    <http-port>8081</http-port>
+    <socket-port>6666</socket-port>
+    <admin-port>6667</admin-port>
+    <!-- A list of data partitions assigned to this server -->
+    <partitions></partitions>
+  </server>
+</cluster>

@@ -369,24 +369,64 @@ public class Workload {
 
         IntegerGenerator keyGenerator = null;
         if(recordSelection.compareTo(Benchmark.UNIFORM_RECORD_SELECTION) == 0) {
-
+            // uniform keys from 0 to record-count (if warmup performed)
+            // when no warmup, 0 to some big number
+            // n.b. this can result either in keys being queried which do not
+            // exist
             int keySpace = (recordCount > 0) ? recordCount : Integer.MAX_VALUE;
             keyGenerator = new UniformIntegerGenerator(0, keySpace - 1);
 
         } else if(recordSelection.compareTo(Benchmark.ZIPFIAN_RECORD_SELECTION) == 0) {
-
+            // zipf selection over 0 -> high known key + some extra padding for
+            // new vals
+            // again may produce keys which are not prepopulated, but at the
+            // tail
             int expectedNewKeys = (int) (opCount * writeProportion * 2.0);
             keyGenerator = new ScrambledZipfianGenerator(recordCount + expectedNewKeys);
 
         } else if(recordSelection.compareTo(Benchmark.LATEST_RECORD_SELECTION) == 0) {
-
+            // zipf over the inserted keys
             keyGenerator = new SkewedLatestGenerator(insertKeySequence);
 
         } else if(recordSelection.compareTo(Benchmark.FILE_RECORD_SELECTION) == 0) {
-
             keyGenerator = new FileIntegerGenerator(0, keysFromFile);
+        } else if(recordSelection.compareTo("samekey") == 0) {
+            // just hit key 1 all the time
+            keyGenerator = new IntegerGenerator() {
 
+                @Override
+                public int nextInt() {
+                    return 1;
+                }
+            };
+        } else if(recordSelection.compareTo("samekey2") == 0) {
+            // just hit key 1 all the time
+            keyGenerator = new IntegerGenerator() {
+
+                @Override
+                public int nextInt() {
+                    return 2;
+                }
+            };
+        } else if(recordSelection.compareTo("samekey3") == 0) {
+            // just hit key 1 all the time
+            keyGenerator = new IntegerGenerator() {
+
+                @Override
+                public int nextInt() {
+                    return 3;
+                }
+            };
+        } else if(recordSelection.compareTo("3min_rand_then_key4") == 0) {
+            // random uniform for 3 minutes, then switch to all same key
+            int keySpace = (recordCount > 0) ? recordCount : Integer.MAX_VALUE;
+            keyGenerator = new TemporaryUniformIntegerGeneratorThenSingleKey(0, keySpace - 1, 4);
         }
+        // } else if(recordSelection.compareTo("partition_0") == 0) {
+        // keyGenerator = new SamePartitionGenerator(0);
+        // } else if(recordSelection.compareTo("partition_1") == 0) {
+        // keyGenerator = new SamePartitionGenerator(1);
+        // }
         this.keyProvider = getKeyProvider(keyTypeClass, keyGenerator, cachedPercent);
         this.randomSampler = new Random(System.currentTimeMillis());
     }
