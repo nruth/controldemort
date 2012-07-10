@@ -1,5 +1,5 @@
-Prototype elastic storage controller & instrumented Voldemort & YCSB from
-my masters thesis project. 
+Prototype partition-load aware elastic storage controller & 
+instrumented Voldemort & YCSB from my masters thesis project. 
 
 Feel free to contact me if you can't figure out how to get started, as the
 documentation and scripts here are unlikely to be improved to a useful state.
