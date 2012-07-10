@@ -14,6 +14,16 @@ the history is not important.
 A separate commit has been retained which shows the changes made to Voldemort 
 and its YCSB client 8b3049495950ec4a51ad069b92b59fee753ec76d
 
+## Deployment
+
+ 1. create or modify a cluster configuration using your servers
+ 2. launch the initial voldemort cluster and check it works (client demo from getting-started guide on voldemort website)
+ 3. launch the controller with controller/launch.rb optionally preceded by LOAD_ASSUMPTION=uniform to change rebalancing strategy
+ 4. start the voldemort-performance-tool (YCSB) load generators to begin experimentation.
+
+N.B. you will need to modify and rebuild Voldemort for your load generators with your controller's hostname, by modifying the VoldemortWrapper class's hard-coded server connection. 
+Patch / pull request with YAML or JSON config file welcome. 
+https://github.com/nruth/controldemort/blob/master/voldemort-0.90.1-nruth/test/integration/voldemort/performance/benchmark/VoldemortWrapper.java#L260
 
 Useful commands:
 
